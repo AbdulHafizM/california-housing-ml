@@ -1,50 +1,31 @@
-#California Housing Price Prediction
+# California Housing Price Prediction Pipeline
 
+This repository contains an end-to-end machine learning workflow designed to predict median house values across California districts using the 1990 census dataset. Built entirely with `scikit-learn`, the project demonstrates production-ready data science practices, including custom feature engineering, robust data transformation pipelines, and rigorous prevention of target leakage.
 
-#Project Overview
-This repository contains an end-to-end machine learning pipeline designed to predict median house values across California districts. Built with scikit-learn, the project demonstrates core data science workflows including data cleaning, custom feature engineering, rigorous pipeline construction, and model evaluation without data leakage.
+## System Architecture
 
-#Architecture & Workflow
-Data Segregation: Separates predictor features from target labels (median_house_value) immediately after the train-test split to strictly prevent target leakage during transformations.
+The pipeline processes raw geographic and demographic data into scaled, encoded features ready for model ingestion. 
 
-Exploratory Data Analysis (EDA): Uses correlation matrices and distribution histograms to identify high-impact predictors, such as median district income.
+* **Data Segregation:** The target variable (`median_house_value`) is fully isolated from the training predictors prior to any transformations to prevent data leakage.
+* **Exploratory Data Analysis (EDA):** Leverages `seaborn` and `matplotlib` to map district coordinates, visualize housing value distributions, and extract high-correlation features via a localized correlation matrix.
+* **Custom Feature Engineering:** Implements a custom `BaseEstimator` and `TransformerMixin` class (`CombinedAttributesAdder`) to dynamically compute context-rich metrics:
+  * `rooms_per_household`
+  * `bedrooms_per_room`
+  * `population_per_household`
+* **Preprocessing Pipeline:** Utilizes a `ColumnTransformer` to route distinct data types through specialized operations:
+  * **Numerical Features:** Processed via `SimpleImputer` (median strategy) to handle missing values, followed by `StandardScaler` for zero-mean, unit-variance standardization.
+  * **Categorical Features:** Handled via `OneHotEncoder` to create binary vector representations of the `ocean_proximity` attribute.
+* **Model Training & Evaluation:** Fits predictive models (baseline `LinearRegression`, extensible to `RandomForestRegressor` via `GridSearchCV`) and evaluates final performance on a hold-out test set using Root Mean Squared Error (RMSE).
 
-Feature Engineering: Implements a custom scikit-learn transformer (CombinedAttributesAdder) to dynamically generate context-rich ratios:
+## Repository Structure
 
-rooms_per_household
-
-bedrooms_per_room
-
-population_per_household
-
-Preprocessing Pipeline: Utilizes a ColumnTransformer to route data types through appropriate transformations:
-
-Numerical: Missing value imputation via SimpleImputer (median strategy) and feature scaling via StandardScaler.
-
-Categorical: Binary vectorization of ocean_proximity via OneHotEncoder.
-
-Model Training & Evaluation: Fits predictive models (e.g., LinearRegression, RandomForestRegressor via GridSearchCV) onto the prepared dataset and evaluates performance against the test set using Root Mean Squared Error (RMSE).
-
-#Requirements
-
-Python 3.8+
-
-pandas
-
-numpy
-
-matplotlib
-
-seaborn
-
-scikit-learn
-
-#Usage
-
-Clone this repository to your local machine.
-
-Ensure the source dataset housing.csv is placed in the root directory.
-
-Open housing.ipynb in Jupyter Notebook or JupyterLab.
-
-Execute the cells sequentially to ingest the data, build the transformation pipeline, train the model, and output the final RMSE metric.
+```text
+├── data/
+│   └── housing.csv          # Raw California housing dataset
+├── notebooks/
+│   └── housing.ipynb        # Core ML pipeline and exploratory data analysis
+├── src/                     # (Optional) Extracted python modules for production
+│   └── custom_transformers.py
+├── .gitignore
+├── requirements.txt
+└── README.md
